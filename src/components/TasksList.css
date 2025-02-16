@@ -1,0 +1,124 @@
+.tasks-container {
+  padding: 20px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input-container {
+  margin-bottom: 20px;
+  max-width: 400px;  /* Limit width */
+  margin-left: auto;
+  margin-right: auto;  /* Center the container */
+}
+
+.input-container input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.input-container button {
+  padding: 8px 16px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.input-container button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #ff0000;
+  padding: 10px;
+  margin-bottom: 20px;
+  background-color: #ffebee;
+  border-radius: 4px;
+}
+
+.tasks-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  column-gap: 40px;  /* Keep wider gaps between columns */
+  row-gap: 1px;     /* Reduce space between rows */
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.task-card {
+  width: 100%;
+  border: none;
+  padding: 8px;  /* Reduced from 15px */
+  border-radius: 4px;
+  background-color: transparent;
+  color: #000;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.task-card.clickable:hover {
+  transform: translateY(-2px);
+  /* Remove shadow on hover */
+}
+
+.task-card p {
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.task-card strong {
+  color: #333;
+  margin-right: 8px;
+}
+
+.task-card .metadata {
+  word-break: break-all;
+  font-size: 0.9em;
+  color: #444 !important;
+}
+
+.no-tasks {
+  text-align: center;
+  color: #666;
+}
+
+.image-container {
+  margin-bottom: 15px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.submission-thumbnail {
+  max-width: 200px;
+  max-height: 200px;
+  object-fit: contain;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 4px;
+  background-color: white;
+}
+
+.image-content {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.theme-text {
+  text-align: center;
+  margin-top: 8px;
+  color: #666;
+  font-size: 0.9em;
+} 
