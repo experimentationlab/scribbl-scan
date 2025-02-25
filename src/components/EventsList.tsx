@@ -44,30 +44,60 @@ interface EventsListProps {
   inputDetails: { hash: string; blockNumber: string } | null;
 }
 
-export default function EventsList({ payloadHash, inputDetails }: EventsListProps) {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const BLOCK_RANGE = 50000n; // Maximum allowed block range
 
+async function fetchEventsInRange(fromBlock: bigint, toBlock: bigint, payloadHash: `0x${string}`) {
   const client = createPublicClient({
     chain: holesky,
     transport: http()
   });
+  return await client.getContractEvents({
+    address: "0x844E494489BEFC2baA9c6d168a659264a7779505",
+    abi: contractAbi,
+    eventName: 'NoticeReceived',
+    args: { payloadHash },
+    fromBlock,
+    toBlock
+  });
+}
+
+// Fetch all events with pagination
+const fetchAllEvents = async (payloadHash: `0x${string}`) => {
+  const client = createPublicClient({
+    chain: holesky,
+    transport: http()
+  });
+  const latestBlock = await client.getBlockNumber();
+  let currentFromBlock = 3358559n;
+  const allEvents = [];
+
+  while (currentFromBlock <= latestBlock) {
+    const currentToBlock = BigInt(Math.min(
+      Number(currentFromBlock + BLOCK_RANGE),
+      Number(latestBlock)
+    ));
+    
+    const batchEvents = await fetchEventsInRange(currentFromBlock, currentToBlock, payloadHash);
+    allEvents.push(...batchEvents);
+    
+    if (currentToBlock === latestBlock) break;
+    currentFromBlock = currentToBlock + 1n;
+  }
+
+  return allEvents;
+};
+
+export default function EventsList({ payloadHash, inputDetails }: EventsListProps) {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchEvents = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const fetchedEvents = await client.getContractEvents({
-        address: "0x844E494489BEFC2baA9c6d168a659264a7779505",
-        abi: contractAbi,
-        eventName: 'NoticeReceived',
-        args: { payloadHash: payloadHash as `0x${string}` },
-        fromBlock: 3358559n,
-        toBlock: 'latest'
-      });
-
+      const fetchedEvents = await fetchAllEvents(payloadHash as `0x${string}`);
       console.log('Fetched events:', fetchedEvents);
       setEvents(fetchedEvents as Event[]);
     } catch (err) {

@@ -62,6 +62,41 @@ export default function TasksList({
     transport: http()
   });
 
+  const BLOCK_RANGE = 50000n; // Maximum allowed block range
+
+  async function fetchTasksInRange(fromBlock: bigint, toBlock: bigint) {
+    return await client.getContractEvents({
+      address: "0xff35E413F5e22A9e1Cc02F92dcb78a5076c1aaf3",
+      abi: contractAbi,
+      eventName: 'TaskIssued',
+      args: { callback: "0x844E494489BEFC2baA9c6d168a659264a7779505" as Address },
+      fromBlock,
+      toBlock
+    });
+  }
+
+  // Fetch all tasks with pagination
+  const fetchAllTasks = async () => {
+    const latestBlock = await client.getBlockNumber();
+    let currentFromBlock = 3358671n;
+    const allTasks = [];
+
+    while (currentFromBlock <= latestBlock) {
+      const currentToBlock = BigInt(Math.min(
+        Number(currentFromBlock + BLOCK_RANGE),
+        Number(latestBlock)
+      ));
+      
+      const batchTasks = await fetchTasksInRange(currentFromBlock, currentToBlock);
+      allTasks.push(...batchTasks);
+      
+      if (currentToBlock === latestBlock) break;
+      currentFromBlock = currentToBlock + 1n;
+    }
+
+    return allTasks;
+  };
+
   const decodeImageFromHex = (inputHex: string) => {
     try {
       const jsonString = hexToString(inputHex as `0x${string}`);
@@ -99,14 +134,7 @@ export default function TasksList({
 
     try {
       const formattedAddress = userAddress.toLowerCase();
-      const fetchedTasks = await client.getContractEvents({
-        address: "0xff35E413F5e22A9e1Cc02F92dcb78a5076c1aaf3",
-        abi: contractAbi,
-        eventName: 'TaskIssued',
-        args: { callback: "0x844E494489BEFC2baA9c6d168a659264a7779505" as Address },
-        fromBlock: 3358671n,
-        toBlock: 'latest'
-      });
+      const fetchedTasks = await fetchAllTasks();
 
       // Get transaction details for each task and filter by signer
       const userTasks = await Promise.all(
